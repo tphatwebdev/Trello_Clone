@@ -30,7 +30,7 @@ const AppBar = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <AppsIcon sx={{ color: 'primary.main' }}/>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <SvgIcon component={trello} inheritViewBox sx={{ color: 'primary.main' }}/>
+          <SvgIcon component={trello} fontSize='small' inheritViewBox sx={{ color: 'primary.main' }}/>
           <Typography variant='span' sx={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'primary.main' }}>Trello</Typography>
         </Box>
         <Workspaces/>
@@ -44,7 +44,7 @@ const AppBar = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <TextField id="outlined-basic" label="Search..." variant="outlined" size='small'/>
         <ModeSelect/>
-        <Tooltip title="Notification">
+        <Tooltip title="Notifications">
           <IconButton>
             <Badge
               variant='dot'
@@ -55,13 +55,13 @@ const AppBar = () => {
               }}
               sx={{ cursor: 'pointer' }}
             >
-              <NotificationsNoneIcon />
+              <NotificationsNoneIcon sx={{ color: 'primary.main' }}/>
             </Badge>
           </IconButton>
         </Tooltip>
         <Tooltip title="Help">
           <IconButton>
-            <HelpOutlineOutlinedIcon sx={{ cursor: 'pointer' }}/>
+            <HelpOutlineOutlinedIcon sx={{ cursor: 'pointer', color: 'primary.main' }}/>
           </IconButton>
         </Tooltip>
         <Profiles/>
