@@ -1,25 +1,24 @@
+import { cyan, deepOrange, orange, teal } from '@mui/material/colors'
 import { createTheme } from '@mui/material/styles'
-import { red } from '@mui/material/colors'
-
 // Create a theme instance.
 const theme = createTheme({
-  cssVariables: true,
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#2945c1'
-    },
-    secondary: {
-      main: '#19857b'
-    },
-    error: {
-      main: red.A400
-    },
-    text: {
-      secondary: red[500],
-      abcxyz: '#d6ed55'
+  colorSchemes: {
+    light: {
+      palette: {
+        primary: teal,
+        secondary: deepOrange
+      }
+    }, dark: {
+      palette: {
+        primary: cyan,
+        secondary: orange
+      }
     }
+  },
+  cssVariables: {
+    colorSchemeSelector: 'class'
   }
+
 })
 
 export default theme
