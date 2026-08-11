@@ -16,6 +16,7 @@ import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import Profiles from './Menus/Profiles'
+import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
 
 const AppBar = () => {
   return (
@@ -25,7 +26,9 @@ const AppBar = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      px: 2
+      paddingX: 2,
+      gap: 2,
+      overflowX: 'auto'
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <AppsIcon sx={{ color: 'primary.main' }}/>
@@ -33,16 +36,18 @@ const AppBar = () => {
           <SvgIcon component={trello} fontSize='small' inheritViewBox sx={{ color: 'primary.main' }}/>
           <Typography variant='span' sx={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'primary.main' }}>Trello</Typography>
         </Box>
-        <Workspaces/>
-        <Recent/>
-        <Started/>
-        <Templates/>
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+          <Workspaces/>
+          <Recent/>
+          <Started/>
+          <Templates/>
+          <Button variant="outlined" startIcon={<LibraryAddIcon/>}>Create</Button>
+        </Box>
 
-        <Button variant="outlined">Create</Button>
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <TextField id="outlined-basic" label="Search..." variant="outlined" size='small'/>
+        <TextField id="outlined-basic" label="Search..." variant="outlined" size='small' sx={{ minWidth: '120px' }}/>
         <ModeSelect/>
         <Tooltip title="Notifications">
           <IconButton>
