@@ -18,9 +18,23 @@ import AddCardIcon from '@mui/icons-material/AddCard'
 import DragHandleIcon from '@mui/icons-material/DragHandle'
 import ListCards from './ListCards/ListCards'
 import { mapOrder } from '~/utils/sorts'
-
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 function Column({ column }) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: column._id,
+      data: { ...column }
+    })
+
+  const dndKitColumnStyles = {
+    touchAction: 'none',
+    // Translate thay cho Tranform tranh' bug
+    transform: CSS.Translate.toString(transform),
+    transition
+  }
+
   const id = useId()
   const buttonId = `${id}-column-dropdown`
   const menuId = `${id}-menu-column-dropdown`
@@ -28,20 +42,26 @@ function Column({ column }) {
   const open = Boolean(anchorEl)
   const handleClick = (event) => {setAnchorEl(event.currentTarget)}
   const handleClose = () => {setAnchorEl(null)}
+
   const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id')
   return (
-    <Box sx={(theme) => ({
-      minWidth: '300px',
-      maxWidth: '300px',
-      bgcolor: '#ebecf0',
-      ...theme.applyStyles('dark', {
-        bgcolor: '#333643'
-      }),
-      ml: 2,
-      borderRadius: '6px',
-      height: 'fit-content',
-      maxHeight: `calc(${theme.trello.boardContentHeight} - ${theme.spacing(5)})`
-    })}>
+    <Box
+      ref={setNodeRef}
+      style={dndKitColumnStyles}
+      {...attributes}
+      {...listeners}
+      sx={(theme) => ({
+        minWidth: '300px',
+        maxWidth: '300px',
+        bgcolor: '#ebecf0',
+        ...theme.applyStyles('dark', {
+          bgcolor: '#333643'
+        }),
+        ml: 2,
+        borderRadius: '6px',
+        height: 'fit-content',
+        maxHeight: `calc(${theme.trello.boardContentHeight} - ${theme.spacing(5)})`
+      })}>
       {/* Box column header */}
       <Box sx={(theme) => ({
         height: theme.trello.columnHeaderHeight,
