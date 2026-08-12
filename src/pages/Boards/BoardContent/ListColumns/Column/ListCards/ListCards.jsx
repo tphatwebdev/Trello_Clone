@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box'
 import CardTrello from './CardTrello/CardTrello'
-function ListCards() {
+function ListCards({ cards }) {
   return (
     <Box sx={(theme) => ({
       p: '0 5px',
@@ -19,13 +19,7 @@ function ListCards() {
       '&::-webkit-scrollbar-thumb': { backgroundColor: '#ced0da' },
       '&::-webkit-scrollbar-thumb:hover': { backgroundColor: '#bfc2cf' }
     })}>
-      <CardTrello/>
-      <CardTrello temporaryHideMedia/>
-      <CardTrello temporaryHideMedia/>
-      <CardTrello temporaryHideMedia/>
-      <CardTrello temporaryHideMedia/>
-      <CardTrello temporaryHideMedia/>
-      <CardTrello temporaryHideMedia/>
+      {cards.map(card => <CardTrello key={card._id} card={card}/>)}
     </Box>
   )
 }
