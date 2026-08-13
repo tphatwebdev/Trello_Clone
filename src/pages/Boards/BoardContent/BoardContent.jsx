@@ -1,9 +1,16 @@
 import Box from '@mui/material/Box'
 import ListColumns from './ListColumns/ListColumns'
 import { mapOrder } from '~/utils/sorts'
-import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, defaultDropAnimationSideEffects } from '@dnd-kit/core'
 import { useEffect, useState } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
+import Column from './ListColumns/Column/Column'
+import CardTrello from './ListColumns/Column/ListCards/CardTrello/CardTrello'
+
+const ACTIVE_DRAG_ITEM_TYPE = {
+  COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
+  CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
+}
 
 const BoardContent = ({ board }) => {
   // yeu cau chuot di chuyen 10px moi kich hoat event
@@ -15,12 +22,24 @@ const BoardContent = ({ board }) => {
   const mySensors = useSensors(mouseSensor, touchSensor)
 
   const [orderedColumn, setOrderedColumn] = useState([])
+  // cung` 1 thoi diem chi co 1 phan tu dang duoc keo tha(column hoac card)
+  const [activeDragItemsId, setActiveDragItemsId] = useState(null)
+  const [activeDragItemsType, setActiveDragItemsTyped] = useState(null)
+  const [activeDragItemsData, setActiveDragItemsData] = useState(null)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrderedColumn(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
   }, [board])
 
+  const handleDragStart = (event) => {
+    // console.log('handleDragStart', event)
+    setActiveDragItemsId(event?.active?.id)
+    setActiveDragItemsTyped(event?.active?.data?.current?.columnId ? ACTIVE_DRAG_ITEM_TYPE.CARD : ACTIVE_DRAG_ITEM_TYPE.COLUMN)
+    setActiveDragItemsData(event?.active?.data?.current)
+  }
+
   const handleDragEnd = (event) => {
+    console.log('handleDragEnd', event)
     const { active, over } = event
 
     // neu keo ra ngoai thi return tranh loi
@@ -34,10 +53,26 @@ const BoardContent = ({ board }) => {
       const dndOrderedColumn = arrayMove(orderedColumn, oldIndex, newIndex)
       setOrderedColumn(dndOrderedColumn)
     }
+    setActiveDragItemsId(null)
+    setActiveDragItemsTyped(null)
+    setActiveDragItemsData(null)
+  }
+
+  const customDropAnimation = {
+    sideEffects: defaultDropAnimationSideEffects({
+      styles: {
+        active: {
+          opacity: '0.5'
+        }
+      }
+    })
   }
 
   return (
-    <DndContext onDragEnd={handleDragEnd} sensors={mySensors}>
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      sensors={mySensors}>
       <Box sx={(theme) => ({
         bgcolor: '#1976d2',
         ...theme.applyStyles('dark', {
@@ -48,8 +83,14 @@ const BoardContent = ({ board }) => {
         p: '10px 0'
       })}>
         <ListColumns columns={orderedColumn}/>
+        <DragOverlay dropAnimation={customDropAnimation}>
+          {!activeDragItemsType && null}
+          {(activeDragItemsType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemsData}/>}
+          {(activeDragItemsType === ACTIVE_DRAG_ITEM_TYPE.CARD) && <CardTrello card={activeDragItemsData}/>}
+        </DragOverlay>
       </Box>
     </DndContext>
   )
 }
+
 export default BoardContent
