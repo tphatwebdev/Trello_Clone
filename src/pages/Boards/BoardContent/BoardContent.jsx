@@ -1,8 +1,19 @@
 import Box from '@mui/material/Box'
 import ListColumns from './ListColumns/ListColumns'
 import { mapOrder } from '~/utils/sorts'
-import { DndContext, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, defaultDropAnimationSideEffects } from '@dnd-kit/core'
-import { useEffect, useState } from 'react'
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+  closestCorners,
+  pointerWithin,
+  getFirstCollision
+} from '@dnd-kit/core'
+import { useState, useRef, useCallback } from 'react'
 import { cloneDeep } from 'lodash'
 import { arrayMove } from '@dnd-kit/sortable'
 import Column from './ListColumns/Column/Column'
@@ -23,24 +34,74 @@ const BoardContent = ({ board }) => {
   // Uu tien su dung 2 loai sensor la mouseSensor, touchSensor de co ux tot tren mobile
   const mySensors = useSensors(mouseSensor, touchSensor)
 
-  const [orderedColumn, setOrderedColumn] = useState([])
-
+  // Khởi tạo state ban đầu cho danh sách column đã được sắp xếp.
+  // Sử dụng callback () => ... (Lazy Initial State) để hàm sắp xếp `mapOrder`
+  // chỉ chạy DUY NHẤT một lần khi component vừa được tạo (mount), tránh chạy lại mỗi khi re-render.
+  const [orderedColumn, setOrderedColumn] = useState(() => {
+    return mapOrder(board?.columns, board?.columnOrderIds, '_id')
+  })
+  // Kỹ thuật "Adjusting state when a prop changes" (Đồng bộ state khi props thay đổi):
+  // So sánh trực tiếp trong quá trình render (render phase). Nếu `board` truyền từ component cha
+  // đã bị thay đổi (ví dụ: dữ liệu được fetch mới từ API hoặc cập nhật từ bên ngoài):
+  const [prevBoard, setPrevBoard] = useState(board)
+  if (board !== prevBoard) {
+    setPrevBoard(board) // Cập nhật lại board cũ để dùng cho lần so sánh render kế tiếp
+    setOrderedColumn(mapOrder(board?.columns, board?.columnOrderIds, '_id')) // Sắp xếp lại danh sách columns theo dữ liệu board mới
+  }
   // cung` 1 thoi diem chi co 1 phan tu dang duoc keo tha(column hoac card)
   const [activeDragItemsId, setActiveDragItemsId] = useState(null)
   const [activeDragItemsType, setActiveDragItemsTyped] = useState(null)
   const [activeDragItemsData, setActiveDragItemsData] = useState(null)
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOrderedColumn(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
-  }, [board])
+
+  // Ref để track giá trị overId cuối cùng phục vụ cho việc tính toán va chạm
+  const lastOverId = useRef(null)
+
 
   const findColumnByCardId = (cardId) => {
     return orderedColumn.find(column => column.cards.map(card => card._id)?.includes(cardId))
   }
 
+  // Custom collision detection strategy để sửa bug flickering và lặp vô tận (infinite re-render)
+  const customCollisionDetection = useCallback((args) => {
+    // 1. Nếu đang kéo Column thì dùng closestCorners chuẩn hơn
+    if (activeDragItemsType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
+      return closestCorners({ ...args })
+    }
+
+    // 2. Tìm các điểm giao nhau, va chạm (intersections) với con trỏ pointer
+    const pointerCollisions = pointerWithin(args)
+
+    // Nếu pointerCollisions là rỗng (kéo ra ngoài hoặc khoảng trống giữa các column)
+    // thì trả về lastOverId cũ để giữ cho card không bị nhảy (flicker)
+    if (!pointerCollisions?.length) {
+      return lastOverId.current ? [{ id: lastOverId.current }] : []
+    }
+
+    // 3. Tìm overId đầu tiên trong danh sách pointerCollisions
+    let overId = getFirstCollision(pointerCollisions, 'id')
+
+    if (overId) {
+      // Nếu overId là một Column, ta sẽ tìm cardId gần nhất trong Column đó
+      const checkColumn = orderedColumn.find(c => c._id === overId)
+      if (checkColumn) {
+        overId = closestCorners({
+          ...args,
+          droppableContainers: args.droppableContainers.filter(
+            c => c.id !== overId && checkColumn.cardOrderIds?.includes(c.id)
+          )
+        })[0]?.id
+      }
+
+      lastOverId.current = overId
+      return [{ id: overId }]
+    }
+
+    // Fallback trả về lastOverId nếu có
+    return lastOverId.current ? [{ id: lastOverId.current }] : []
+  }, [activeDragItemsType, orderedColumn])
+
 
   const handleDragStart = (event) => {
-    // console.log('handleDragStart', event)
     setActiveDragItemsId(event?.active?.id)
     setActiveDragItemsTyped(event?.active?.data?.current?.columnId ? ACTIVE_DRAG_ITEM_TYPE.CARD : ACTIVE_DRAG_ITEM_TYPE.COLUMN)
     setActiveDragItemsData(event?.active?.data?.current)
@@ -111,27 +172,28 @@ const BoardContent = ({ board }) => {
 
   // khi keo' card hoac column xong xuoi.
   const handleDragEnd = (event) => {
-    // console.log('handleDragEnd', event)
-    if (activeDragItemsType === ACTIVE_DRAG_ITEM_TYPE.CARD) {
-      // console.log('keo tha card khong lam gi cal')
-      return
-    }
     const { active, over } = event
 
     // neu keo ra ngoai thi return tranh loi
     if (!active || !over) return
 
-    if (active.id !== over.id) {
-      const oldIndex = orderedColumn.findIndex(c => c._id === active.id) //Lay vi tri cu tu active
-      const newIndex = orderedColumn.findIndex(c => c._id === over.id) //Lay vi tri moi tu over
+    // Xử lý kéo thả Column
+    if (activeDragItemsType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
+      if (active.id !== over.id) {
+        const oldIndex = orderedColumn.findIndex(c => c._id === active.id) //Lay vi tri cu tu active
+        const newIndex = orderedColumn.findIndex(c => c._id === over.id) //Lay vi tri moi tu over
 
-      // Dung arrayMove de sap xep lai array columns ban dau
-      const dndOrderedColumn = arrayMove(orderedColumn, oldIndex, newIndex)
-      setOrderedColumn(dndOrderedColumn)
+        // Dung arrayMove de sap xep lai array columns ban dau
+        const dndOrderedColumn = arrayMove(orderedColumn, oldIndex, newIndex)
+        setOrderedColumn(dndOrderedColumn)
+      }
     }
+
+    // Sau khi kéo thả xong, reset toàn bộ state kéo thả và ref tracking
     setActiveDragItemsId(null)
     setActiveDragItemsTyped(null)
     setActiveDragItemsData(null)
+    lastOverId.current = null
   }
 
   const customDropAnimation = {
@@ -147,6 +209,8 @@ const BoardContent = ({ board }) => {
   return (
     <DndContext
       sensors={mySensors}
+      // thuật toán phát hiện va chạm tùy chỉnh để hỗ trợ kéo thả card giữa các columns mượt mà, tránh lặp vô tận
+      collisionDetection={customCollisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
