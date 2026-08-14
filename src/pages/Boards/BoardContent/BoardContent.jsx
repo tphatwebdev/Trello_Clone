@@ -11,7 +11,8 @@ import {
   defaultDropAnimationSideEffects,
   closestCorners,
   pointerWithin,
-  getFirstCollision
+  getFirstCollision,
+  closestCenter
 } from '@dnd-kit/core'
 import { useState, useRef, useCallback } from 'react'
 import { cloneDeep } from 'lodash'
@@ -55,38 +56,6 @@ const BoardContent = ({ board }) => {
   const findColumnByCardId = (cardId) => {
     return orderedColumn.find(column => column.cards.map(card => card._id)?.includes(cardId))
   }
-  // Custom collision detection strategy để sửa bug flickering và lặp vô tận (infinite re-render)
-  const customCollisionDetection = useCallback((args) => {
-    // 1. Nếu đang kéo Column thì dùng closestCorners chuẩn hơn
-    if (activeDragItemsType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
-      return closestCorners({ ...args })
-    }
-    // 2. Tìm các điểm giao nhau, va chạm (intersections) với con trỏ pointer
-    const pointerCollisions = pointerWithin(args)
-    // Nếu pointerCollisions là rỗng (kéo ra ngoài hoặc khoảng trống giữa các column)
-    // thì trả về lastOverId cũ để giữ cho card không bị nhảy (flicker)
-    if (!pointerCollisions?.length) {
-      return lastOverId.current ? [{ id: lastOverId.current }] : []
-    }
-    // 3. Tìm overId đầu tiên trong danh sách pointerCollisions
-    let overId = getFirstCollision(pointerCollisions, 'id')
-    if (overId) {
-      // Nếu overId là một Column, ta sẽ tìm cardId gần nhất trong Column đó
-      const checkColumn = orderedColumn.find(c => c._id === overId)
-      if (checkColumn) {
-        overId = closestCorners({
-          ...args,
-          droppableContainers: args.droppableContainers.filter(
-            c => c.id !== overId && checkColumn.cardOrderIds?.includes(c.id)
-          )
-        })[0]?.id
-      }
-      lastOverId.current = overId
-      return [{ id: overId }]
-    }
-    // Fallback trả về lastOverId nếu có
-    return lastOverId.current ? [{ id: lastOverId.current }] : []
-  }, [activeDragItemsType, orderedColumn])
   // Cập nhật lại state trong trường hợp di chuyển card giữa các column khác nhau
   const moveCardBetweenDiffColumn = (
     overColumn,
@@ -248,6 +217,39 @@ const BoardContent = ({ board }) => {
       }
     })
   }
+
+  // Custom collision detection strategy để sửa bug flickering và lặp vô tận (infinite re-render)
+  const customCollisionDetection = useCallback((args) => {
+    // 1. Nếu đang kéo Column thì dùng closestCorners chuẩn hơn
+    if (activeDragItemsType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
+      return closestCorners({ ...args })
+    }
+    // 2. Tìm các điểm giao nhau, va chạm (intersections) với con trỏ pointer
+    const pointerCollisions = pointerWithin(args)
+    // Nếu pointerCollisions là rỗng (kéo ra ngoài hoặc khoảng trống giữa các column)
+    // thì trả về lastOverId cũ để giữ cho card không bị nhảy (flicker)
+    if (!pointerCollisions?.length) {
+      return lastOverId.current ? [{ id: lastOverId.current }] : []
+    }
+    // 3. Tìm overId đầu tiên trong danh sách pointerCollisions
+    let overId = getFirstCollision(pointerCollisions, 'id')
+    if (overId) {
+      // Nếu overId là một Column, ta sẽ tìm cardId gần nhất trong Column đó
+      const checkColumn = orderedColumn.find(c => c._id === overId)
+      if (checkColumn) {
+        overId = closestCenter({
+          ...args,
+          droppableContainers: args.droppableContainers.filter(
+            container => container.id !== overId && checkColumn.cardOrderIds?.includes(container.id)
+          )
+        })[0]?.id
+      }
+      lastOverId.current = overId
+      return [{ id: overId }]
+    }
+    // Fallback trả về lastOverId nếu có
+    return lastOverId.current ? [{ id: lastOverId.current }] : []
+  }, [activeDragItemsType, orderedColumn])
 
   return (
     <DndContext
