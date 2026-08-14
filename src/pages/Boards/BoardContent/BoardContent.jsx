@@ -11,11 +11,11 @@ import {
   defaultDropAnimationSideEffects,
   closestCorners,
   pointerWithin,
-  getFirstCollision,
-  closestCenter
+  getFirstCollision
 } from '@dnd-kit/core'
 import { useState, useRef, useCallback } from 'react'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
+import { generatePlaceholderCard } from '~/utils/formatters'
 import { arrayMove } from '@dnd-kit/sortable'
 import Column from './ListColumns/Column/Column'
 import CardTrello from './ListColumns/Column/ListCards/CardTrello/CardTrello'
@@ -83,6 +83,10 @@ const BoardContent = ({ board }) => {
       if (nextActiveColumn) {
         // xoa' card ở column active
         nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId)
+        // Thêm PlaceholderCard nếu column rỗng
+        if (isEmpty(nextActiveColumn.cards)) {
+          nextActiveColumn.cards=[generatePlaceholderCard(nextActiveColumn)]
+        }
         // cap nhat lai array cardOderIds cho chuan du lieu
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
       }
@@ -98,6 +102,10 @@ const BoardContent = ({ board }) => {
         }
         // Tiếp theo là thêm card đang kéo vào column đó theo vị trí index
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, rebuild_activeDraggingCardData)
+
+        // Xoá PlacehoderCard đi nếu nó đang tồn tại
+        nextOverColumn.cards = nextOverColumn.cards.filter(card => !card.FE_PlaceholderCard)
+
         // cap nhat lai array cardOderIds cho chuan du lieu
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
@@ -237,7 +245,7 @@ const BoardContent = ({ board }) => {
       // Nếu overId là một Column, ta sẽ tìm cardId gần nhất trong Column đó
       const checkColumn = orderedColumn.find(c => c._id === overId)
       if (checkColumn) {
-        overId = closestCenter({
+        overId = closestCorners({
           ...args,
           droppableContainers: args.droppableContainers.filter(
             container => container.id !== overId && checkColumn.cardOrderIds?.includes(container.id)
