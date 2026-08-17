@@ -2,7 +2,6 @@ import Container from '@mui/material/Container'
 import AppBar from '~/components/AppBar/AppBar'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
-import { mockData } from '~/apis/mock-data'
 import { useEffect, useState } from 'react'
 import { fetchBoardDetailsAPI } from '~/apis'
 
@@ -10,7 +9,7 @@ function Board() {
   const [board, setBoard] = useState(null)
 
   useEffect(() => {
-    const boardId = '6a829dbf559f4e22854b9241'
+    const boardId = '6a82b3095080dc199a3efc54'
     fetchBoardDetailsAPI(boardId).then((board) => {
       setBoard(board)
     })
