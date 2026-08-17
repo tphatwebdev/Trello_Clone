@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { fetchBoardDetailsAPI } from '~/apis'
 
 function Board() {
-  const { board, setBoard } = useState(null)
+  const [board, setBoard] = useState(null)
 
   useEffect(() => {
     const boardId = '6a829dbf559f4e22854b9241'
