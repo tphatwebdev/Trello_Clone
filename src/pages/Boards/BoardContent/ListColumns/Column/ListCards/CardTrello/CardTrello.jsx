@@ -34,12 +34,14 @@ function CardTrello({ card }) {
   return (
     <Card
       ref={setNodeRef} style={dndKitCardStyles} {...attributes} {...listeners}
-      sx={{
+      sx={(theme) => ({
         cursor: 'pointer',
         boxShadow: '0 1px 1px rgba(0, 0, 0, 0.2)',
         overflow: 'unset',
-        display: card?.FE_PlaceholderCard ? 'none' : 'block'
-      }}>
+        display: card?.FE_PlaceholderCard ? 'none' : 'block',
+        border: '1px solid transparent',
+        '&:hover': { borderColor: theme.palette.primary.main }
+      })}>
       {card?.cover &&
         <CardMedia
           component="img"
