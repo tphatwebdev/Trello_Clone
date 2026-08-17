@@ -3,8 +3,8 @@ import ListColumns from './ListColumns/ListColumns'
 import { mapOrder } from '~/utils/sorts'
 import {
   DndContext,
-  MouseSensor,
-  TouchSensor,
+  // MouseSensor,
+  // TouchSensor,
   useSensor,
   useSensors,
   DragOverlay,
@@ -13,6 +13,7 @@ import {
   pointerWithin,
   getFirstCollision
 } from '@dnd-kit/core'
+import { MouseSensor, TouchSensor } from '~/customlib/DndkitSensors'
 import { useState, useRef, useCallback } from 'react'
 import { cloneDeep, isEmpty } from 'lodash'
 import { generatePlaceholderCard } from '~/utils/formatters'
