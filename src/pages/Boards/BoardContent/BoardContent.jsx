@@ -26,7 +26,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-const BoardContent = ({ board, createNewColumn, createNewCard, moveColumns }) => {
+const BoardContent = ({ board, createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn }) => {
   // yeu cau chuot di chuyen 10px moi kich hoat event
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
   // nhan giu 250ms va dung sai cua cam ung thi kich hoat event
@@ -36,16 +36,17 @@ const BoardContent = ({ board, createNewColumn, createNewCard, moveColumns }) =>
   // Khởi tạo state ban đầu cho danh sách column đã được sắp xếp.
   // Sử dụng callback () => ... (Lazy Initial State) để hàm sắp xếp `mapOrder`
   // chỉ chạy DUY NHẤT một lần khi component vừa được tạo (mount), tránh chạy lại mỗi khi re-render.
-  const [orderedColumn, setOrderedColumn] = useState(() => {
-    return mapOrder(board?.columns, board?.columnOrderIds, '_id')
-  })
+  // const [orderedColumn, setOrderedColumn] = useState(() => {
+  //   return mapOrder(board?.columns, board?.columnOrderIds, '_id')
+  // })
+  const [orderedColumn, setOrderedColumn] = useState(board.columns)
   // Kỹ thuật "Adjusting state when a prop changes" (Đồng bộ state khi props thay đổi):
   // So sánh trực tiếp trong quá trình render (render phase). Nếu `board` truyền từ component cha
   // đã bị thay đổi (ví dụ: dữ liệu được fetch mới từ API hoặc cập nhật từ bên ngoài):
   const [prevBoard, setPrevBoard] = useState(board)
   if (board !== prevBoard) {
     setPrevBoard(board) // Cập nhật lại board cũ để dùng cho lần so sánh render kế tiếp
-    setOrderedColumn(mapOrder(board?.columns, board?.columnOrderIds, '_id')) // Sắp xếp lại danh sách columns theo dữ liệu board mới
+    setOrderedColumn(board.columns) // columns đã được sắp xếp ở component cha cao nhất _id.jsx
   }
   // cung` 1 thoi diem chi co 1 phan tu dang duoc keo tha(column hoac card)
   const [activeDragItemsId, setActiveDragItemsId] = useState(null)
@@ -182,19 +183,26 @@ const BoardContent = ({ board, createNewColumn, createNewCard, moveColumns }) =>
         // kéo thả card trong cùng 1 column
         // lấy vị trí cũ từ thằng oldColumnWhenDraggingCard
         const oldCardIndex = oldColumnWhenDraggingCard?.cards?.findIndex(c => c._id === activeDragItemsId) //Lay vi tri cu tu active
+
         const newCardIndex = overColumn?.cards?.findIndex(c => c._id === overCardId) //Lay vi tri moi tu over
         // Dung arrayMove de sap xep lai array cards ban dau
         const dndOrderedCards = arrayMove(oldColumnWhenDraggingCard?.cards, oldCardIndex, newCardIndex)
+        const dndOderedCardIds = dndOrderedCards.map(card => card._id)
+
+        // vẫn gọi update state để tránh delay hoặc flickering UI (lúc kéo thả phải chờ gọi API)
         setOrderedColumn(prevColumns => {
           // Clone 'orderedColumn' ra array moi' de xu ly data roi` return orderedColumn moi'
           const nextColumns = cloneDeep(prevColumns)
+
           // Tìm tới cái column mà chúng ta đang thả
           const targetColumn = nextColumns.find(column => column._id === overColumn._id)
+
           // Cập nhật lại 2 giá trị mới là card và cardOrderIds trong cái targetColumn
           targetColumn.cards = dndOrderedCards
-          targetColumn.cardOrderIds = dndOrderedCards.map(card => card._id)
+          targetColumn.cardOrderIds = dndOderedCardIds
           return nextColumns
         })
+        moveCardInTheSameColumn(dndOrderedCards, dndOderedCardIds, oldColumnWhenDraggingCard._id)
       }
     }
 
@@ -205,8 +213,8 @@ const BoardContent = ({ board, createNewColumn, createNewCard, moveColumns }) =>
         const newColumnIndex = orderedColumn.findIndex(c => c._id === over.id) //Lay vi tri moi tu over
         // Dung arrayMove de sap xep lai array columns ban dau
         const dndOrderedColumn = arrayMove(orderedColumn, oldColumnIndex, newColumnIndex)
-        moveColumns(dndOrderedColumn)
         setOrderedColumn(dndOrderedColumn)
+        moveColumns(dndOrderedColumn)
       }
     }
 
