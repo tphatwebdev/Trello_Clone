@@ -26,7 +26,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
 }
 
-const BoardContent = ({ board, createNewColumn, createNewCard }) => {
+const BoardContent = ({ board, createNewColumn, createNewCard, moveColumns }) => {
   // yeu cau chuot di chuyen 10px moi kich hoat event
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
   // nhan giu 250ms va dung sai cua cam ung thi kich hoat event
@@ -205,6 +205,7 @@ const BoardContent = ({ board, createNewColumn, createNewCard }) => {
         const newColumnIndex = orderedColumn.findIndex(c => c._id === over.id) //Lay vi tri moi tu over
         // Dung arrayMove de sap xep lai array columns ban dau
         const dndOrderedColumn = arrayMove(orderedColumn, oldColumnIndex, newColumnIndex)
+        moveColumns(dndOrderedColumn)
         setOrderedColumn(dndOrderedColumn)
       }
     }

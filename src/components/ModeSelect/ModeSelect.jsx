@@ -30,7 +30,7 @@ function ModeSelect() {
       <Select
         labelId="label-select-dark-light-mode"
         id="select-dark-light-mode"
-        value={mode}
+        value={mode || 'light'}
         label="Mode"
         onChange={handleChange}
         sx={{
