@@ -70,10 +70,12 @@ function Board() {
       ...board,
       columns: board.columns.map(column => {
         if (column._id === createdCard.columnId) {
+          // Nếu column rỗng (đang chứa PlaceholderCard)
+          const isColumnEmpty = column.cards.some(card => card.FE_PlaceholderCard)
           return {
             ...column,
-            cards: [...column.cards, createdCard],
-            cardOrderIds: [...column.cardOrderIds, createdCard._id]
+            cards: isColumnEmpty ? [createdCard] : [...column.cards, createdCard],
+            cardOrderIds: isColumnEmpty ? [createdCard._id] : [...column.cardOrderIds, createdCard._id]
           }
         }
         return column
@@ -132,10 +134,14 @@ function Board() {
     }
     setBoard(newBoard)
     // gọi API xử lý phía BE
+    let prevCardOrderIds = dndOrderedColumn.find(c => c._id === prevColumnId)?.cardOrderIds
+    // xử lí vấn đề khi kéo card cuối cùng ra khỏi column rỗng
+    // xoá nó đi trước khi gửi lên BE
+    if (prevCardOrderIds[0].includes('placehoder-card')) prevCardOrderIds = []
     moveCardToDifferentColumnAPI({
       currentCardId,
       prevColumnId,
-      prevCardOrderIds: dndOrderedColumn.find(c => c._id === prevColumnId)?.cardOrderIds,
+      prevCardOrderIds,
       nextColumnId,
       nextCardOrderIds: dndOrderedColumn.find(c => c._id === nextColumnId)?.cardOrderIds
     })
