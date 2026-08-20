@@ -29,7 +29,8 @@ const BoardContent = ({
   createNewCard,
   moveColumns,
   moveCardInTheSameColumn,
-  moveCardToDifferentColumn
+  moveCardToDifferentColumn,
+  deleteColumnDetails
 }) => {
   // yeu cau chuot di chuyen 10px moi kich hoat event
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } })
@@ -38,11 +39,6 @@ const BoardContent = ({
   // Uu tien su dung 2 loai sensor la mouseSensor, touchSensor de co ux tot tren mobile
   const mySensors = useSensors(mouseSensor, touchSensor)
   // Khởi tạo state ban đầu cho danh sách column đã được sắp xếp.
-  // Sử dụng callback () => ... (Lazy Initial State) để hàm sắp xếp `mapOrder`
-  // chỉ chạy DUY NHẤT một lần khi component vừa được tạo (mount), tránh chạy lại mỗi khi re-render.
-  // const [orderedColumn, setOrderedColumn] = useState(() => {
-  //   return mapOrder(board?.columns, board?.columnOrderIds, '_id')
-  // })
   const [orderedColumn, setOrderedColumn] = useState(board.columns)
   // Kỹ thuật "Adjusting state when a prop changes" (Đồng bộ state khi props thay đổi):
   // So sánh trực tiếp trong quá trình render (render phase). Nếu `board` truyền từ component cha
@@ -304,7 +300,12 @@ const BoardContent = ({
         height: theme.trello.boardContentHeight,
         p: '10px 0'
       })}>
-        <ListColumns columns={orderedColumn} createNewColumn={createNewColumn} createNewCard={createNewCard}/>
+        <ListColumns
+          columns={orderedColumn}
+          createNewColumn={createNewColumn}
+          createNewCard={createNewCard}
+          deleteColumnDetails={deleteColumnDetails}
+        />
         <DragOverlay dropAnimation={customDropAnimation}>
           {!activeDragItemsType && null}
           {(activeDragItemsType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemsData}/>}

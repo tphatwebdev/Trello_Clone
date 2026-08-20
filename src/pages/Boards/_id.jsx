@@ -9,7 +9,8 @@ import {
   createNewCardAPI,
   updateBoardDetailsAPI,
   updateColumnDetailsAPI,
-  moveCardToDifferentColumnAPI
+  moveCardToDifferentColumnAPI,
+  deleteColumnDetailsAPI
 } from '~/apis'
 import { mapOrder } from '~/utils/sorts'
 import { generatePlaceholderCard } from '~/utils/formatters'
@@ -17,6 +18,7 @@ import { isEmpty } from 'lodash'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
+import { toast } from 'react-toastify'
 
 
 // import { mockData } from '~/apis/mock-data'
@@ -147,6 +149,21 @@ function Board() {
     })
   }
 
+  // xử lý xoá 1 column và cards trong nó
+  const deleteColumnDetails = (columnId) => {
+    // update cho chuẩn dữ liệu state board
+    const newBoard = {
+      ...board,
+      columns: board.columns.filter(c => c._id !== columnId),
+      columnOrderIds: board.columnOrderIds.filter(_id => _id !== columnId)
+    }
+    setBoard(newBoard)
+    // gọi API xử lý phía BE
+    deleteColumnDetailsAPI(columnId).then(res => {
+      toast.success(res?.deleteResult)
+    })
+  }
+
   if (!board) {
     return (
       <Box sx={{
@@ -174,6 +191,7 @@ function Board() {
         moveColumns={moveColumns}
         moveCardInTheSameColumn={moveCardInTheSameColumn}
         moveCardToDifferentColumn={moveCardToDifferentColumn}
+        deleteColumnDetails={deleteColumnDetails}
       />
     </Container>
   )
