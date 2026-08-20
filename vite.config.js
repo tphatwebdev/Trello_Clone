@@ -5,6 +5,11 @@ import svgr from 'vite-plugin-svgr'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // cho phép Vite sử dụng process.env
+  define: {
+    // eslint-disable-next-line no-undef
+    'process.env.BUILD_MODE': JSON.stringify(process.env.BUILD_MODE)
+  },
   plugins: [
     withFilter(
       svgr(),
