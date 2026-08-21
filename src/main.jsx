@@ -6,8 +6,10 @@ import { ThemeProvider } from '@mui/material/styles'
 import theme from '~/theme.js'
 import { ToastContainer } from 'react-toastify'
 import { ConfirmProvider } from 'material-ui-confirm'
+import { Provider } from 'react-redux'
+import { store } from '~/redux/store'
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  <Provider store={store}>
     <ThemeProvider theme={theme}>
       <ConfirmProvider defaultOptions={{
         allowClose: false,
@@ -21,5 +23,5 @@ createRoot(document.getElementById('root')).render(
         <ToastContainer position='bottom-left' theme='colored'/>
       </ConfirmProvider>
     </ThemeProvider>
-  </StrictMode>
+  </Provider>
 )
