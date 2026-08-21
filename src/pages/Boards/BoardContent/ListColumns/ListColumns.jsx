@@ -7,15 +7,24 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
+import { createNewColumnAPI } from '~/apis'
+import { generatePlaceholderCard } from '~/utils/formatters'
+import {
+  updateCurrentActiveBoard,
+  selectCurrentActiveBoard
+} from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { cloneDeep } from 'lodash'
 
-
-function ListColumns({ columns, createNewColumn, createNewCard, deleteColumnDetails }) {
+function ListColumns({ columns }) {
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
   const [isOpenNewColumnForm, setIsOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => setIsOpenNewColumnForm(!isOpenNewColumnForm)
   const [newColumnTitle, setNewColumnTitle] = useState('')
 
 
-  const addNewColumn = () => {
+  const addNewColumn = async () => {
     if (!newColumnTitle) {
       toast.error('Please enter colomn title')
       return
@@ -24,7 +33,21 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumnDeta
     const newColumnData = {
       title: newColumnTitle
     }
-    createNewColumn(newColumnData)
+
+    if (!board) return
+    // gọi API tạo mới column và làm lại dữ liệu State Board
+    const createdColumn = await createNewColumnAPI({
+      ...newColumnData,
+      boardId: board._id
+    })
+    createdColumn.cards = [generatePlaceholderCard(createdColumn)]
+    createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
+    //đúng lại state data board (thay vì gọi api fetchBoardDetailsAPI)
+    const newBoard = cloneDeep(board)
+    newBoard.columns.push(createdColumn)
+    newBoard.columnOrderIds.push(createdColumn._id)
+    // cập nhật dữ liệu vào trong redux store
+    dispatch(updateCurrentActiveBoard(newBoard))
     toggleOpenNewColumnForm()
     setNewColumnTitle('')
   }
@@ -41,12 +64,8 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumnDeta
         overflowY: 'hidden',
         '&::-webkit-scrollbar-track': { m: 2 }
       }}>
-        {columns?.map(column => <Column
-          key={column._id}
-          column={column}
-          createNewCard={createNewCard}
-          deleteColumnDetails={deleteColumnDetails}
-        />)}
+        {columns?.map(column =>
+          <Column key={column._id} column={column}/>)}
         {/* Add new column CTA */}
         {!isOpenNewColumnForm
           ? <Box onClick={toggleOpenNewColumnForm} sx={(theme) => ({
