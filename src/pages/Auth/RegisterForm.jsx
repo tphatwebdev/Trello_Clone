@@ -21,7 +21,7 @@ import {
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 
 function RegisterForm() {
-  const { register, handleSubmit, formState: { errors }, watch } = useForm()
+  const { register, handleSubmit, formState: { errors }, getValues } = useForm()
   const submitRegister = (data) => {
     console.log('submit register', data)
   }
@@ -87,7 +87,7 @@ function RegisterForm() {
                 error={!!errors['passwor_confirmation']}
                 {...register('passwor_confirmation', {
                   validate: (value) => {
-                    if (value === watch('password')) return true
+                    if (value === getValues('password')) return true
                     return 'Password Confirmation does not match'
                   }
                 })}
@@ -97,6 +97,7 @@ function RegisterForm() {
           </Box>
           <CardActions sx={{ padding: '0 1em 1em 1em' }}>
             <Button
+              className='interceptor-loading'
               type="submit"
               variant="contained"
               color="primary"
