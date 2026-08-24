@@ -12,9 +12,10 @@ import {
 } from '@dnd-kit/core'
 import { MouseSensor, TouchSensor } from '~/customlib/DndkitSensors'
 import { useState, useRef, useCallback } from 'react'
-import { cloneDeep, isEmpty } from 'lodash'
+import cloneDeep from 'lodash/cloneDeep'
+import isEmpty from 'lodash/isEmpty'
 import { generatePlaceholderCard } from '~/utils/formatters'
-import { arrayMove } from '@dnd-kit/sortable'
+import { arrayMove } from '@dnd-kit/sortable/'
 import Column from './ListColumns/Column/Column'
 import CardTrello from './ListColumns/Column/ListCards/CardTrello/CardTrello'
 

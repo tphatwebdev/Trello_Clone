@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import authorizeAxiosInstance from '~/utils/authorizeAxios'
 import { API_ROOT } from '~/utils/constant'
 import { mapOrder } from '~/utils/sorts'
-import { isEmpty } from 'lodash'
+import isEmpty from 'lodash/isEmpty'
 import { generatePlaceholderCard } from '~/utils/formatters'
 
 // khởi tạo giá trị State của 1 slice trong redux
