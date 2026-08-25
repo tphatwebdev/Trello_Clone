@@ -1,4 +1,6 @@
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { loginUserAPI } from '~/redux/user/userSlice'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Avatar from '@mui/material/Avatar'
@@ -20,17 +22,26 @@ import {
 } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import Alert from '@mui/material/Alert'
+import { toast } from 'react-toastify'
+
 
 function LoginForm() {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { register, handleSubmit, formState: { errors } } = useForm()
   let [searchParams] = useSearchParams()
   const registeredEmail = searchParams.get('registeredEmail')
   const verifiedEmail = searchParams.get('verifiedEmail')
-  // const { email, token } = Object.fromEntries([...searchParams])
-
 
   const submitLogIn = (data) => {
-    console.log('submit login', data)
+    const { email, password } = data
+    toast.promise(
+      dispatch(loginUserAPI({ email, password })),
+      { pending: 'Logging in...' }
+    ).then(res => {
+      // kiểm tra không có lỗi thì redirect về route /
+      if (!res.error) navigate('/')
+    })
   }
   return (
     <form onSubmit={handleSubmit(submitLogIn)}>

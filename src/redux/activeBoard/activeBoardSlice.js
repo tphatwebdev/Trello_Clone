@@ -70,5 +70,4 @@ export const selectCurrentActiveBoard = (state) => {
   return state.activeBoard.currentActiveBoard
 }
 
-// export default activeBoardSlice.reducer
 export const activeBoardReducer = activeBoardSlice.reducer
