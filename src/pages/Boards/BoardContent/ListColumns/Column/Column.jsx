@@ -252,7 +252,10 @@ function Column({ column }) {
                   '& label': { color: 'text.primary' },
                   '& input': {
                     color: theme.palette.primary.main,
-                    bgcolor: theme.palette.mode === 'dark' ? '#333643' : 'white'
+                    bgcolor: 'white',
+                    ...theme.applyStyles('dark', {
+                      bgcolor: '#333643'
+                    })
                   },
                   '& label.Mui-focused': { color: theme.palette.primary.main },
                   '& .MuiOutlinedInput-root': {
