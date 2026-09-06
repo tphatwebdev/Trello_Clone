@@ -3,11 +3,6 @@ import authorizeAxiosInstance from '~/utils/authorizeAxios'
 import { API_ROOT } from '~/utils/constant'
 
 // Board
-// export const fetchBoardDetailsAPI = async (boardId) => {
-//   const response = await axios.get(`${API_ROOT}/v1/boards/${boardId}`)
-//   return response.data
-// }
-
 export const updateBoardDetailsAPI = async (boardId, updateData) => {
   const response = await authorizeAxiosInstance.put(`${API_ROOT}/v1/boards/${boardId}`, updateData)
   return response.data
@@ -60,5 +55,11 @@ export const refreshTokenAPI = async () => {
 
 export const fetchBoardsAPI = async (searchPath) => {
   const response = await authorizeAxiosInstance.get(`${API_ROOT}/v1/boards${searchPath}`)
+  return response.data
+}
+
+export const createNewBoardAPI = async (data) => {
+  const response = await authorizeAxiosInstance.post(`${API_ROOT}/v1/boards`, data)
+  toast.success('Board created successfully!')
   return response.data
 }
