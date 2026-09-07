@@ -1,4 +1,3 @@
-import { styled } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Avatar from '@mui/material/Avatar'
@@ -17,18 +16,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { selectCurrentUser, updateUserAPI } from '~/redux/user/userSlice'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1
-})
+import VisuallyHiddenInput from '~/components/Form/VisuallyHiddenInput'
 
 function AccountTab() {
   const dispatch = useDispatch()
@@ -45,8 +33,6 @@ function AccountTab() {
 
   const submitChangeGeneralInformation = (data) => {
     const { displayName } = data
-    console.log('displayName: ', displayName)
-
     // Nếu không có sự thay đổi gì về displayname thì không làm gì cả
     if (displayName === currentUser?.displayName) return
     toast.promise(

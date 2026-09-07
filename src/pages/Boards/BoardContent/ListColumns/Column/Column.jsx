@@ -153,9 +153,11 @@ function Column({ column }) {
           <ToggleFocusInput
             value={column?.title}
             onChangedValue={onUpdateColumnTitle}
+            inputFontSize="17.5px"
             data-no-dnd="true"
+            fitContent
           />
-          <Box>
+          <Box sx={{ flexShrink: 0 }}>
             <Tooltip title='More options'>
               <ExpandMoreIcon
                 sx={{ color: 'text.primary', cursor: 'pointer' }}
