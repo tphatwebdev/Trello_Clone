@@ -13,6 +13,7 @@ import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/acti
 import cloneDeep from 'lodash/cloneDeep'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 import { updateCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
+import { updateCardDetailsAPI } from '~/apis'
 
 function CardTrello({ card }) {
   const dispatch = useDispatch()
@@ -38,17 +39,15 @@ function CardTrello({ card }) {
   }
 
   const onUpdateCardTitle = (newTitle) => {
-    if (board) {
+    updateCardDetailsAPI(card._id, { title: newTitle }).then(() => {
       const newBoard = cloneDeep(board)
       const column = newBoard.columns.find(c => c._id === card.columnId)
       if (column) {
         const cardToUpdate = column.cards.find(c => c._id === card._id)
-        if (cardToUpdate) {
-          cardToUpdate.title = newTitle
-        }
+        if (cardToUpdate) cardToUpdate.title = newTitle
       }
       dispatch(updateCurrentActiveBoard(newBoard))
-    }
+    })
   }
 
   const setActiveCard = () => {

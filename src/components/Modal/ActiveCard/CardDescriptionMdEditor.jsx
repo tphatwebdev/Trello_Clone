@@ -6,29 +6,29 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import EditNoteIcon from '@mui/icons-material/EditNote'
 
-const markdownValueExample = `
-  *\`Markdown Content Example:\`*
+// const markdownValueExample = `
+//   *\`Markdown Content Example:\`*
 
-  **Hello world | Tran Tien Phat | Taskly MERN Stack**
-  [![](https://i.pinimg.com/736x/ee/3e/88/ee3e88df2b236e848a1beef8fe7b3703.jpg)](https://i.pinimg.com/736x/fc/7d/69/fc7d69f452da12acb2c2991678bb87ea.jpg)
-  \`\`\`javascript
-  import React from "react"
-  import ReactDOM from "react-dom"
-  import MDEditor from '@uiw/react-md-editor'
-  \`\`\`
-`
-function CardDescriptionMdEditor() {
+//   **Hello world | Tran Tien Phat | Taskly MERN Stack**
+//   [![](https://i.pinimg.com/736x/ee/3e/88/ee3e88df2b236e848a1beef8fe7b3703.jpg)](https://i.pinimg.com/736x/fc/7d/69/fc7d69f452da12acb2c2991678bb87ea.jpg)
+//   \`\`\`javascript
+//   import React from "react"
+//   import ReactDOM from "react-dom"
+//   import MDEditor from '@uiw/react-md-editor'
+//   \`\`\`
+// `
+function CardDescriptionMdEditor({ cardDescriptionProp, handleUpdateCardDescription }) {
   // Lấy giá trị 'dark', 'light' hoặc 'system' mode từ MUI để support phần Markdown bên dưới: data-color-mode={mode}
   const { mode } = useColorScheme()
 
   // State xử lý chế độ Edit và chế độ View
   const [markdownEditMode, setMarkdownEditMode] = useState(false)
   // State xử lý giá trị markdown khi chỉnh sửa
-  const [cardDescription, setCardDescription] = useState(markdownValueExample)
+  const [cardDescription, setCardDescription] = useState(cardDescriptionProp)
 
   const updateCardDescription = () => {
     setMarkdownEditMode(false)
-    console.log('cardDescription: ', cardDescription)
+    handleUpdateCardDescription(cardDescription)
   }
 
   return (
