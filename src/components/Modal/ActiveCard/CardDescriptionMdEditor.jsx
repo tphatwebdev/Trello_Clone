@@ -25,6 +25,12 @@ function CardDescriptionMdEditor({ cardDescriptionProp, handleUpdateCardDescript
   const [markdownEditMode, setMarkdownEditMode] = useState(false)
   // State xử lý giá trị markdown khi chỉnh sửa
   const [cardDescription, setCardDescription] = useState(cardDescriptionProp)
+  const [prevCardDescription, setPrevCardDescription] = useState(cardDescriptionProp)
+
+  if (cardDescriptionProp !== prevCardDescription) {
+    setPrevCardDescription(cardDescriptionProp)
+    setCardDescription(cardDescriptionProp)
+  }
 
   const updateCardDescription = () => {
     setMarkdownEditMode(false)

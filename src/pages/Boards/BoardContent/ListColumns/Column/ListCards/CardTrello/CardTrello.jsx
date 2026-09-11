@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import cloneDeep from 'lodash/cloneDeep'
 import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
-import { updateCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
+import { updateCurrentActiveCard, showModalActiveCard } from '~/redux/activeCard/activeCardSlice'
 import { updateCardDetailsAPI } from '~/apis'
 
 function CardTrello({ card }) {
@@ -53,6 +53,8 @@ function CardTrello({ card }) {
   const setActiveCard = () => {
     // cập nhật data cho cái activeCard trong redux
     dispatch(updateCurrentActiveCard(card))
+    // hiện modal ActiveCard lên
+    dispatch(showModalActiveCard())
   }
 
   return (
