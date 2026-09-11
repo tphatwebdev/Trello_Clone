@@ -33,7 +33,7 @@ export const notificationsSlice = createSlice({
       state.currentNotifications = action.payload
     },
     // Thêm mới 1 bản ghi notification vào đầu mảng currentNotifications
-    addNotifications: (state, action) => {
+    addNotification: (state, action) => {
       const incomingInvitation = action.payload
       state.currentNotifications.unshift(incomingInvitation)
     }
@@ -57,7 +57,7 @@ export const notificationsSlice = createSlice({
 export const {
   clearCurrentNotifications,
   updateCurrentNotifications,
-  addNotifications
+  addNotification
 } = notificationsSlice.actions
 
 export const selectCurrentNotification = state => {

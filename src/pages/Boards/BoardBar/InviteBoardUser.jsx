@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form'
 import { EMAIL_RULE, FIELD_REQUIRED_MESSAGE, EMAIL_RULE_MESSAGE } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
 import { inviteUserToBoardAPI } from '~/apis'
+import { socketIoInstance } from '~/socketClient'
 
 function InviteBoardUser({ boardId }) {
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
@@ -24,11 +25,12 @@ function InviteBoardUser({ boardId }) {
   const submitInviteUserToBoard = (data) => {
     const { inviteeEmail } = data
     // Gọi API mời một người dùng nào đó vào làm thành viên của board
-    inviteUserToBoardAPI({ inviteeEmail, boardId }).then(() => {
+    inviteUserToBoardAPI({ inviteeEmail, boardId }).then((invitation) => {
       // Clear thẻ input sử dụng react-hook-form bằng setValue, đồng thời đóng popup over
       setValue('inviteeEmail', null)
       setAnchorPopoverElement(null)
-      // Mời một người dùng vào board xong thì cũng sẽ gửi/emit sự kiện socket lên server
+      // Mời một người dùng vào board xong thì cũng sẽ gửi/emit sự kiện socket lên server -> FE_USER_INVITED_TO_BOARD
+      socketIoInstance.emit('FE_USER_INVITED_TO_BOARD', invitation)
     })
   }
 
@@ -57,7 +59,7 @@ function InviteBoardUser({ boardId }) {
       >
         <form onSubmit={handleSubmit(submitInviteUserToBoard)} style={{ width: '320px' }}>
           <Box sx={{ p: '15px 20px 20px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant="span" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Invite User To This Board!</Typography>
+            <Typography component="span" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Invite User To This Board!</Typography>
             <Box>
               <TextField
                 autoFocus
