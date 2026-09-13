@@ -57,6 +57,12 @@ function CardTrello({ card }) {
     dispatch(showModalActiveCard())
   }
 
+  const handleOpenCardWithComment = (e) => {
+    e.stopPropagation() // Ngăn chặn click kích hoạt sự kiện kéo thả dnd-kit hoặc click mở card cha
+    dispatch(updateCurrentActiveCard(card))
+    dispatch(showModalActiveCard({ focusComment: true }))
+  }
+
   return (
     <Card
       onClick={setActiveCard}
@@ -93,7 +99,7 @@ function CardTrello({ card }) {
       {shouldShowCardActions() &&
         <CardActions sx={{ p: '0 4px 8px 4px' }}>
           {!!card?.memberIds?.length && <Button size="small" startIcon={<GroupIcon/>}>{card?.memberIds?.length}</Button>}
-          {!!card?.comments?.length && <Button size="small" startIcon={<CommentIcon/>}>{card?.comments?.length}</Button>}
+          {!!card?.comments?.length && <Button size="small" startIcon={<CommentIcon/>} onClick={handleOpenCardWithComment} >{card?.comments?.length}</Button>}
           {!!card?.attachments?.length && <Button size="small" startIcon={<AttachmentIcon/>}>{card?.attachments?.length}</Button>}
         </CardActions>
       }

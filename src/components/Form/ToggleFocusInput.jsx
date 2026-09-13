@@ -117,12 +117,6 @@ function ToggleFocusInput({
             }
           }
         }}
-        inputProps={{
-          style: {
-            fontSize: inputFontSize,
-            fontWeight: fontWeight
-          }
-        }}
         {...props}
         sx={(theme) => ({
           '& label': {},

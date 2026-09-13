@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import Box from '@mui/material/Box'
 import ModeSelect from '~/components/ModeSelect/ModeSelect'
 import AppsIcon from '@mui/icons-material/Apps'
@@ -10,20 +9,16 @@ import Recent from './Menus/Recent'
 import Started from './Menus/Started'
 import Templates from './Menus/Templates'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 import Profiles from './Menus/Profiles'
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
-import InputAdornment from '@mui/material/InputAdornment'
-import SearchIcon from '@mui/icons-material/Search'
-import CloseIcon from '@mui/icons-material/Close'
 import { Link } from 'react-router-dom'
 import Notifications from './Notifications/Notifications'
+import AutoCompleteSearchBoard from './SearchBoards/AutoCompleteSearchBoard'
 
 const AppBar = () => {
-  const [searchValue, setSearchValue] = useState('')
   return (
     <Box sx={(theme) => ({
       width: '100%',
@@ -72,7 +67,7 @@ const AppBar = () => {
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <TextField
+        {/* <TextField
           id="outlined-basic"
           label="Search..."
           type='text'
@@ -110,7 +105,9 @@ const AppBar = () => {
               '&.Mui-focused fieldset': { borderColor: 'white' }
             }
           }}
-        />
+        /> */}
+        {/* tìm kiếm nhanh 1 hoặc nhiều boards */}
+        <AutoCompleteSearchBoard/>
         {/* dark-light mode */}
         <ModeSelect/>
         {/* Xử lý hiển thị thông báo - notification */}

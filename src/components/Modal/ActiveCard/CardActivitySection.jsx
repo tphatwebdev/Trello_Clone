@@ -5,11 +5,33 @@ import Avatar from '@mui/material/Avatar'
 import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { selectCurrentUser } from '~/redux/user/userSlice'
+import { resetFocusComment, selectIsFocusComment } from '~/redux/activeCard/activeCardSlice'
+import { useEffect, useRef } from 'react'
 
 function CardActivitySection({ cardComments = [], onAddCardComment }) {
   const currentUser = useSelector(selectCurrentUser)
+  const isFocusComment = useSelector(selectIsFocusComment)
+  const commentInputRef = useRef(null)
+  const dispatch = useDispatch()
+
+
+  useEffect(() => {
+    if (isFocusComment) {
+      // Cần setTimeout khoảng 250ms vì Modal MUI có transition mở (Fade/Scale).
+      // Nếu scroll ngay lập tức khi Modal chưa hoàn tất render layout thì trình duyệt sẽ không cuộn được
+      const timer = setTimeout(() => {
+        commentInputRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center' // Căn ô input vào giữa màn hình cho dễ nhìn
+        })
+        commentInputRef.current?.focus() // Đặt con trỏ để gõ phím được ngay
+        dispatch(resetFocusComment())
+      }, 250)
+      return () => clearTimeout(timer)
+    }
+  }, [dispatch, isFocusComment])
 
   const handleAddCardComment = (event) => {
     // Bắt hành động người dùng nhấn phím Enter && không phải hành động Shift + Enter
@@ -46,6 +68,7 @@ function CardActivitySection({ cardComments = [], onAddCardComment }) {
           variant="outlined"
           multiline
           onKeyDown={handleAddCardComment}
+          inputRef={commentInputRef}
         />
       </Box>
 

@@ -6,8 +6,11 @@ import Popover from '@mui/material/Popover'
 import AddIcon from '@mui/icons-material/Add'
 import Badge from '@mui/material/Badge'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { useSelector } from 'react-redux'
+import { selectCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { CARD_MEMBER_ACTIONS } from '~/utils/constant'
 
-function CardUserGroup({ cardMemberIds = [] }) {
+function CardUserGroup({ cardMemberIds = [], onUpdateCardMembers }) {
   const [anchorPopoverElement, setAnchorPopoverElement] = useState(null)
   const isOpenPopover = Boolean(anchorPopoverElement)
   const popoverId = isOpenPopover ? 'card-all-users-popover' : undefined
@@ -16,15 +19,33 @@ function CardUserGroup({ cardMemberIds = [] }) {
     else setAnchorPopoverElement(null)
   }
 
+  // lấy activeBoard từ redux để lấy dược toàn bộ thông tin những thành viên trong board thông qua field FE_allUsers
+  const board = useSelector(selectCurrentActiveBoard)
+  /**
+   * thành viên trong card sẽ phải là tập con của thành viên trong board
+   * vì thế dựa vào mảng board.FE_allUsers và card.memberIds rồi ta tạo ra 1 mảng FE_CardMembers chứa đủ thông tin của user để hiển thị ra bên ngoài giao diện, bởi mặc định trong card chỉ lưu đám Id của user thôi (memberIds)
+   */
+
+  const FE_CardMembers = cardMemberIds.map(id => {
+    return board.FE_allUsers.find(u => u._id === id)
+  })
+  const handleUpdateCardMember = (user) => {
+    // Tạo 1 biến incomingMemberInfo để gửi cho BE, với 2 thông tin chính là userId và action là xoá khỏi card (REMOVE) hoặc thêm vào card (ADD)
+    const incomingMemberInfo = {
+      userId: user._id,
+      action: cardMemberIds.includes(user._id) ? CARD_MEMBER_ACTIONS.REMOVE : CARD_MEMBER_ACTIONS.ADD
+    }
+    onUpdateCardMembers(incomingMemberInfo)
+  }
   return (
     <Box sx={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
       {/* Hiển thị các user là thành viên của card */}
-      {[...Array(8)].map((_, index) =>
-        <Tooltip title="trungquandev" key={index}>
+      {FE_CardMembers.map((user, index) =>
+        <Tooltip title={user.displayName} key={index}>
           <Avatar
             sx={{ width: 34, height: 34, cursor: 'pointer' }}
-            alt="trungquandev"
-            src="https://trungquandev.com/wp-content/uploads/2019/06/trungquandev-cat-avatar.png"
+            alt={user.displayName}
+            src={user.avatar}
           />
         </Tooltip>
       )}
@@ -73,19 +94,24 @@ function CardUserGroup({ cardMemberIds = [] }) {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Box sx={{ p: 2, maxWidth: '260px', display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-          {[...Array(16)].map((_, index) =>
-            <Tooltip title="trungquandev" key={index}>
+          {board.FE_allUsers.map((user, index) =>
+            <Tooltip title={user.displayName} key={index}>
               {/* Cách làm Avatar kèm badge icon: https://mui.com/material-ui/react-avatar/#with-badge */}
               <Badge
                 sx={{ cursor: 'pointer' }}
                 overlap="rectangular"
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                badgeContent={<CheckCircleIcon fontSize="small" sx={{ color: '#27ae60' }} />}
+                badgeContent={
+                  cardMemberIds.includes(user._id)
+                    ? <CheckCircleIcon fontSize="small" sx={{ color: '#27ae60' }} />
+                    : null
+                }
+                onClick={() => handleUpdateCardMember(user)}
               >
                 <Avatar
                   sx={{ width: 34, height: 34 }}
-                  alt="trungquandev"
-                  src="https://trungquandev.com/wp-content/uploads/2019/06/trungquandev-cat-avatar.png"
+                  alt={user.displayName}
+                  src={user.avatar}
                 />
               </Badge>
             </Tooltip>
