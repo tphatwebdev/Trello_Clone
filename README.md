@@ -62,37 +62,6 @@ The client-side architecture places heavy emphasis on **predictable state manage
 
 ---
 
-## 🏗️ Client Architecture & Data Flow
-
-```mermaid
-flowchart TD
-    User([User Interaction]) --> UI[MUI Component Layer]
-    UI -->|Dispatch Action| ReduxStore[(Redux Toolkit Store)]
-    
-    subgraph Redux State
-        userSlice[User Slice & Session]
-        activeBoardSlice[Active Board & Columns]
-        activeCardSlice[Active Card Details]
-        notificationsSlice[Notifications & Invites]
-    end
-    
-    ReduxStore -->|State Selector| UI
-    UI -->|Trigger API| Axios[Custom Axios Instance]
-    
-    subgraph Axios Interceptor Pipeline
-        ReqInt[Request: Anti-Spam Lock] --> NetReq[Network Request]
-        NetReq --> RespInt[Response: 410 Interceptor]
-        RespInt -->|Token Expired| RefreshQueue[Singleton Refresh Promise Queue]
-        RefreshQueue -->|Success| ReplayReq[Replay Original Requests]
-    end
-    
-    Axios -->|HTTP/REST withCredentials| Server[(Taskly API)]
-    Server -.->|WebSocket Events| SocketClient[Socket.io Client]
-    SocketClient -->|BE_USER_INVITED_TO_BOARD| notificationsSlice
-```
-
----
-
 ## 💻 Tech Stack & Dependencies
 
 | Category | Technology | Purpose & Architectural Justification |
