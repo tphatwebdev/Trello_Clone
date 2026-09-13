@@ -17,6 +17,7 @@ import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
 import { Link } from 'react-router-dom'
 import Notifications from './Notifications/Notifications'
 import AutoCompleteSearchBoard from './SearchBoards/AutoCompleteSearchBoard'
+import SidebarCreateBoardModal from '~/pages/Boards/create'
 
 const AppBar = () => {
   return (
@@ -51,17 +52,22 @@ const AppBar = () => {
           <Recent/>
           <Started/>
           <Templates/>
-          <Button
-            sx={{
-              color: 'white',
-              border: 'none',
-              '&:hover': { border: 'none' }
-            }}
-            variant="outlined"
-            startIcon={<LibraryAddIcon/>}
-          >
-            Create
-          </Button>
+          <SidebarCreateBoardModal
+            customTrigger={(handleOpen) => (
+              <Button
+                sx={{
+                  color: 'white',
+                  border: 'none',
+                  '&:hover': { border: 'none' }
+                }}
+                variant="outlined"
+                startIcon={<LibraryAddIcon/>}
+                onClick={handleOpen}
+              >
+                Create
+              </Button>
+            )}
+          />
         </Box>
 
       </Box>

@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography'
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd'
 import CancelIcon from '@mui/icons-material/Cancel'
 import { useForm, Controller } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import { FIELD_REQUIRED_MESSAGE } from '~/utils/validators'
@@ -27,9 +28,11 @@ const SidebarItem = styled(Box)(({ theme }) => ({
   padding: '12px 16px',
   borderRadius: '8px',
   '&:hover': {
-    backgroundColor: theme.palette.grey[300],
+    color: '#0c66e4',
+    backgroundColor: '#e9f2ff',
     ...theme.applyStyles('dark', {
-      backgroundColor: '#33485D'
+      color: '#90caf9',
+      backgroundColor: '#1c2d41'
     })
   },
   '&.active': {
@@ -52,8 +55,9 @@ const BOARD_TYPES = {
  * Bản chất của cái component SidebarCreateBoardModal này chúng ta sẽ trả về một cái SidebarItem để hiển thị ở màn Board List cho phù hợp giao diện bên đó, đồng thời nó cũng chứa thêm một cái Modal để xử lý riêng form create board.
  * Note: Modal là một low-component mà bọn MUI sử dụng bên trong những thứ như Dialog, Drawer, Menu, Popover. Ở đây ta có thể sử dụng Dialog cũng không thành vấn đề gì, nhưng sẽ sử dụng Modal để dễ linh hoạt tùy biến giao diện từ con số 0 cho phù hợp với mọi nhu cầu nhé.
  */
-function SidebarCreateBoardModal({ afterCreateNewBoard }) {
+function SidebarCreateBoardModal({ afterCreateNewBoard, customTrigger, children }) {
   const { control, register, handleSubmit, reset, formState: { errors } } = useForm()
+  const navigate = useNavigate()
 
   const [isOpen, setIsOpen] = useState(false)
   const handleOpenModal = () => setIsOpen(true)
@@ -64,19 +68,36 @@ function SidebarCreateBoardModal({ afterCreateNewBoard }) {
   }
 
   const submitCreateNewBoard = (data) => {
-    createNewBoardAPI(data).then(() => {
+    createNewBoardAPI(data).then((res) => {
       handleCloseModal()
-      // thông báo đến component cha để xử lý
-      afterCreateNewBoard()
+      // thông báo đến component cha để xử lý nếu có callback
+      if (afterCreateNewBoard) {
+        afterCreateNewBoard(res)
+      } else if (res?._id) {
+        // Mặc định điều hướng tới board mới tạo
+        navigate(`/boards/${res._id}`)
+      }
     })
   }
 
   return (
     <>
-      <SidebarItem onClick={handleOpenModal}>
-        <LibraryAddIcon fontSize="small" />
-        Create a new board
-      </SidebarItem>
+      {customTrigger ? (
+        customTrigger(handleOpenModal)
+      ) : children ? (
+        typeof children === 'function' ? (
+          children(handleOpenModal)
+        ) : (
+          <Box onClick={handleOpenModal} sx={{ display: 'inline-flex' }}>
+            {children}
+          </Box>
+        )
+      ) : (
+        <SidebarItem onClick={handleOpenModal}>
+          <LibraryAddIcon fontSize="small" />
+          Create a new board
+        </SidebarItem>
+      )}
 
       <Modal
         open={isOpen}
@@ -125,12 +146,14 @@ function SidebarCreateBoardModal({ afterCreateNewBoard }) {
                     label="Title"
                     type="text"
                     variant="outlined"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <AbcIcon fontSize="small" />
-                        </InputAdornment>
-                      )
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <AbcIcon fontSize="small" />
+                          </InputAdornment>
+                        )
+                      }
                     }}
                     {...register('title', {
                       required: FIELD_REQUIRED_MESSAGE,
@@ -149,12 +172,14 @@ function SidebarCreateBoardModal({ afterCreateNewBoard }) {
                     type="text"
                     variant="outlined"
                     multiline
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <DescriptionOutlinedIcon fontSize="small" />
-                        </InputAdornment>
-                      )
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <DescriptionOutlinedIcon fontSize="small" />
+                          </InputAdornment>
+                        )
+                      }
                     }}
                     {...register('description', {
                       required: FIELD_REQUIRED_MESSAGE,

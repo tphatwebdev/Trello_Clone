@@ -23,6 +23,7 @@ import {
 import { socketIoInstance } from '~/socketClient'
 import { selectCurrentUser } from '~/redux/user/userSlice'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 
 const BOARD_INVITATION_STATUS = {
@@ -64,6 +65,7 @@ function Notifications() {
         dispatch(addNotification(invitation))
         // B2: Cập nhật trạng thái đang có thông báo đến
         setNewNotification(true)
+        toast.info(`${invitation.inviter?.displayName} vừa mời bạn vào board "${invitation.board?.title}"!`)
       }
     }
 

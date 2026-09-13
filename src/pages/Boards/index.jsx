@@ -31,9 +31,11 @@ const SidebarItem = styled(Box)(({ theme }) => ({
   padding: '12px 16px',
   borderRadius: '8px',
   '&:hover': {
-    backgroundColor: theme.palette.grey[300],
+    color: '#0c66e4',
+    backgroundColor: '#e9f2ff',
     ...theme.applyStyles('dark', {
-      backgroundColor: '#33485D'
+      color: '#90caf9',
+      backgroundColor: '#1c2d41'
     })
   },
   '&.active': {
